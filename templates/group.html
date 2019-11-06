@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="../static/css/style.css">
+  <title>軽音スケジュール</title>
+  <style>
+    .home table {
+      width: 20%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    
+    .home table th:first-child {
+      border-radius: 5px 0 0 0;
+    }
+    
+    .home table th:last-child {
+      border-radius: 0 5px 0 0;
+      border-right: 1px solid #3c6690;
+    }
+    
+    .home table th {
+      /*text-align: center;*/
+      color: white;
+      background: linear-gradient(#829ebc, #225588);
+      border-left: 1px solid #3c6690;
+      border-top: 1px solid #3c6690;
+      border-bottom: 1px solid #3c6690;
+      box-shadow: 0px 1px 1px rgba(255, 255, 255, 0.3) inset;
+      width: 25%;
+      padding: 10px 0;
+    }
+    
+    .home table td {
+      /*text-align: center;*/
+      border-left: 1px solid #a8b7c5;
+      border-bottom: 1px solid #a8b7c5;
+      border-top: none;
+      box-shadow: 0px -3px 5px 1px #eee inset;
+      width: 25%;
+      padding: 10px 0;
+    }
+    
+    .home table td:last-child {
+      border-right: 1px solid #a8b7c5;
+    }
+    
+    .home table tr:last-child td:first-child {
+      border-radius: 0 0 0 5px;
+    }
+    
+    .home table tr:last-child td:last-child {
+      border-radius: 0 0 5px 0;
+    }
+  </style>
+</head>
+
+<body data-spy="scroll" data-target="#navbarResponsive">
+
+  <div class="caption text-center">
+    <div class="container">
+      <header>
+        <div class="row">
+          <h1>{{group_name}}</h1>
+        </div>
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %}
+        <ul class=flashes>
+          {% for category, message in messages %}
+          <div class="{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </ul>
+        {% endif %} {% endwith %}
+      </header>
+    </div>
+    <h3>調整中</h3>
+  </div>
+  <div class="home">
+    <table>
+      <tr>
+        <th>メンバー</th>
+      </tr>
+      {% for member_name in members %}
+      <tr>
+        <td>{{member_name}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+</body>
+
+</html>

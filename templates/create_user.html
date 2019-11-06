@@ -1,0 +1,36 @@
+{% extends "layout.html" %} {% block content %}
+<div class="container">
+  <header>
+    <div class="row">
+      <h1>ユーザー登録</h1>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %}
+    <ul class=flashes>
+      {% for category, message in messages %}
+      <div class="{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </ul>
+    {% endif %} {% endwith %}
+  </header>
+</div>
+
+<hr>
+
+<div class="container">
+  <form method="POST">
+    <div class="col-sm-8 col-sm-offset-2">
+      <div class="caption text-center">
+        <div class="form-group">
+          <label for="user_name"><span class="label label-danger">必須</span> ユーザー名</label>
+          <input type="text" id="user_name" name="user_name" class="form-control" placeholder="UserName" autofocus required>
+        </div>
+        <div class="form-group">
+          <label for="password"><span class="label label-danger">必須</span> パスワード</label>
+          <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">登録</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

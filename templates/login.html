@@ -1,0 +1,25 @@
+{% extends "layout.html" %} {% block content %}
+<div class="login">
+  <div class="login-triangle"></div>
+  <div class="container">
+    <header>
+      <div class="row">
+        <h1>LogIn</h1>
+      </div>
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %}
+      <ul class=flashes>
+        {% for category, message in messages %}
+        <div class="{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </ul>
+      {% endif %} {% endwith %}
+    </header>
+  </div>
+
+  <form class="login-container" method="POST">
+    <p><input type="text" id="user_name" name="user_name" placeholder="UserName" autofocus required></p>
+    <p><input type="password" id="password" name="password" placeholder="Password" required></p>
+    <button type="submit" class="btn btn-primary">送信する</button>
+  </form>
+</div>
+{% endblock %}
