@@ -1,11 +1,18 @@
 <!DOCTYPE HTML>
 
 <head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta http-equiv="Content-Type" content="text/html;  charset=UTF-8" />
   <meta http-equiv="content-script-type" content="text/javascript" />
   <meta http-equiv="content-style-type" content="text/css" />
+
+  <!-- Bootstrap CSS -->
   <link rel="stylesheet" type="text/css" href="../static/css/style.css" />
+
   <title>軽音スケジュール</title>
+
   <script type="text/javascript">
     function bulkchange(id, key) {
       if (document.getElementById("join-" + id).value > 0 && document.inputform.bulkflag.checked == true) {} else {
@@ -79,7 +86,7 @@
   </script>
 </head>
 
-<body>
+<body data-spy="scroll" data-target="#navbarResponsive">
   <div class="mainbox" id="newcomer">
     <h2><span>bib</span></h2>
     <div class="explbox"></div><br/>
@@ -241,8 +248,9 @@
       </div>
       <br /> {% endif %} {% endfor %}
 
-      <!---->
+      <!--
       コメント： <input type="text" name="membercomment" value="" style="width:680px;" /><br />
+      -->
       <br />
       <button type="submit" class="btn btn-primary">登録</button>　　<a href="/">登録せずに戻る</a>
     </form>

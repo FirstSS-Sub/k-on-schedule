@@ -20,16 +20,10 @@ from google_calendar import holiday
 app = Flask(__name__)
 app.secret_key = "k-on2019"
 
-"""
-engine = create_engine('sqlite:///k-on.db')  # user.db というデータベースを使うという宣言です
-Base = declarative_base()  # データベースのテーブルの親です
-"""
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///k-on.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 db = SQLAlchemy(app)
-db.create_all()
 
 """
 CRUD操作
@@ -67,24 +61,12 @@ class UserList(db.Model):
     mon = db.Column(db.String(8), nullable=False, default="00000000")
     tue = db.Column(db.String(8), nullable=False, default="00000000")
     wed = db.Column(db.String(8), nullable=False, default="00000000")
+    update = db.Column(db.Integer(), nullable=False, default=0)
 
-    """
-    def __init__(self, id, user_name, password, thu, fri, sat, sun, mon, tue, wed):
-        self.id = id
-        self.user_name = user_name
-        self.password = password
-        self.thu = thu
-        self.fri = fri
-        self.sat = sat
-        self.sun = sun
-        self.mon = mon
-        self.tue = tue
-        self.wed = wed
-    """
 
     def __repr__(self):
-        return "UserList<{}, {}, {}, {}, {}, {}, {}, {}, {}, {}>".format(
-            self.id, self.user_name, self.password, self.thu, self.fri, self.sat, self.sun, self.mon, self.tue, self.wed)
+        return "UserList<{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}>".format(
+            self.id, self.user_name, self.password, self.thu, self.fri, self.sat, self.sun, self.mon, self.tue, self.wed, self.update)
 
 
 class GroupList(db.Model):
@@ -99,40 +81,12 @@ class GroupList(db.Model):
     member5 = db.Column(db.String(100))
     member6 = db.Column(db.String(100))
 
-    """
-    def __init__(self, id, group_name, member1, member2, member3, member4, member5, member6):
-        self.id = id
-        self.group_name = group_name
-        self.member1 = member1
-        self.member2 = member2
-        self.member3 = member3
-        self.member4 = member4
-        self.member5 = member5
-        self.member6 = member6
-    """
-
     def __repr__(self):
         return "GroupList<{}, {}, {}, {}, {}, {}, {}, {}>".format(
             self.id, self.group_name, self.member1, self.member2, self.member3, self.member4, self.member5, self.member6)
 
 
-"""
-class MemberList(db.Model):
-    __tablename__ = "MemberList"
-    member_name = db.Column(db.String(100), nullable=False)
-
-
-class UserSchedule(db.Model, user_name):
-    __tablename__ = user_name
-    date_time = db.Column(db.Integer,)
-    value = db.Column(db.Integer, nullable=False, default=0)
-"""
-
-"""
-Base.metadata.create_all(engine)  # 実際にデータベースを構築します
-SessionMaker = sessionmaker(bind=engine)  # Pythonとデータベースの経路です
-session = SessionMaker()  # 経路を実際に作成しました
-"""
+db.create_all()
 
 
 @app.route('/')
@@ -157,10 +111,6 @@ def create_user():
         return render_template('create_user.html',
                                title='ユーザーの追加')
 
-    """
-    # ユーザーIDを取得
-    user_id = session.get('user_id')
-    """
 
     # 登録フォームから送られてきた値を取得
     user_name = request.form['user_name']
@@ -171,14 +121,6 @@ def create_user():
     # エラーチェック
     error_message = None
 
-    """
-    if not user_name:
-        error_message = 'ユーザー名を入力してください'
-    elif not password:
-        error_message = 'パスワードを入力してください'
-    elif db.execute('SELECT * FROM UserList WHERE user_name = ?', (user_name,)).fetchone() is not None:
-        error_message = 'ユーザー名 {} はすでに使用されています'.format(user_name)
-    """
     if db.session.query(UserList).filter_by(user_name=user_name).first():
         error_message = 'ユーザー名 {} はすでに使用されています'.format(user_name)
         app.logger.info(error_message)
@@ -188,13 +130,7 @@ def create_user():
         flash(error_message, category='alert alert-danger')
         return redirect(url_for('create_user'))
 
-    """
-    # エラーがなければテーブルに登録する
-    db.execute(
-        'INSERT INTO UserList (user_name, password) VALUES (?, ?)',
-        (user_name, password)
-    )
-    """
+
     # ハッシュ化する
     user = UserList(user_name=user_name,
                     password=generate_password_hash(password))
@@ -204,7 +140,17 @@ def create_user():
     app.logger.info(user.user_name)
 
     flash('ユーザー登録が完了しました', category='alert alert-info')
-    return render_template('home.html', user_name=user_name)
+
+    # make_responseでレスポンスオブジェクトを生成する
+    response = make_response(render_template(
+        'home.html', user_name=user_name))
+
+    # Cookieの設定を行う
+    max_age = 60 * 60  # 1時間
+    expires = int(datetime.now().timestamp()) + max_age
+    response.set_cookie('user_name', value=user.user_name, max_age=max_age)
+    #                   ,expires=expires, path='/', domain=domain, secure=None, httponly=False)
+    return response
 
 
 @app.route('/create_group', methods=['GET', 'POST'])
@@ -214,20 +160,15 @@ def create_group():
     GET ：グループ登録画面に遷移
     POST：グループ登録処理を実施
     """
-    if request.method == 'GET':
+    if request.method == 'GET' and user_name is not None:
         # グループ登録画面に遷移
         return render_template('create_group.html',
                                title='グループの追加')
-
-    if user_name is None:
+    elif request.method == 'GET' and user_name is None:
         flash('ログインしていないユーザーはグループを作成できません', category='alert alert-danger')
         # トップページに遷移
         return redirect(url_for('index'))
 
-    """
-    # ユーザーIDを取得
-    user_id = session.get('user_id')
-    """
 
     # 登録フォームから送られてきた値を取得
     group_name = request.form['group_name']
@@ -338,8 +279,8 @@ def home():
     return render_template('home.html', user_name=user_name)
 
 
-@app.route('/band', methods=['GET', 'POST'])
-def band():
+@app.route('/schedule', methods=['GET', 'POST'])
+def schedule():
     user_name = request.cookies.get('user_name', None)
 
     """
@@ -378,13 +319,13 @@ def band():
         week_data[5]["schedule"] = tue
         week_data[6]["schedule"] = wed
 
-        # return render_template("test2.html", week=week_data, thu=thu, fri=fri, sat=sat, sun=sun, mon=mon, tue=tue, wed=wed)
-        return render_template("test2.html", week=week_data)
+        return render_template("schedule.html", week=week_data)
 
     elif request.method == 'GET' and user_name is None:
         flash('ログインしてください', category='alert alert-danger')
         return redirect(url_for('index'))
 
+    # POSTの時
     week_schedule = []
     for i in range(7):
         day = ""
@@ -408,35 +349,344 @@ def band():
     user.mon = week_schedule[4]
     user.tue = week_schedule[5]
     user.wed = week_schedule[6]
-    app.logger.info(week_schedule)
+
+    # 更新フラグ（update）を1にする
+    user.update = 1
+
     db.session.add(user)
     db.session.commit()
 
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
 
 
 @app.route('/group/<string:group_name>', methods=['GET', 'POST'])
 def group(group_name):
+    user_name = request.cookies.get('user_name', None)
     members = db.session.query(GroupList).filter_by(
         group_name=group_name).first()
-    app.logger.info(members)
 
-    # かなり冗長だがこれしか思いつかなかった
-    group_members = []
-    if members.member1 is not None:
-        group_members.append(members.member1)
-    if members.member2 is not None:
-        group_members.append(members.member2)
-    if members.member3 is not None:
-        group_members.append(members.member3)
-    if members.member4 is not None:
-        group_members.append(members.member4)
-    if members.member5 is not None:
-        group_members.append(members.member5)
-    if members.member6 is not None:
-        group_members.append(members.member6)
+    if user_name is None:
+        flash('ログインしてください', category='alert alert-danger')
+        return redirect(url_for('index'))
 
-    return render_template("group.html", group_name=group_name, members=group_members)
+    if not ((user_name == members.member1) or
+         (user_name == members.member2) or
+         (user_name == members.member3) or
+         (user_name == members.member4) or
+         (user_name == members.member5) or
+         (user_name == members.member6)):
+        flash('このグループには加入していません', category='alert alert-danger')
+        return redirect(url_for('index'))
+
+    if group_name is not None:
+        app.logger.info(members)
+
+        # かなり冗長だがこれしか思いつかなかった
+        group_members = []
+        if members.member1 is not None:
+            group_members.append(members.member1)
+        if members.member2 is not None:
+            group_members.append(members.member2)
+        if members.member3 is not None:
+            group_members.append(members.member3)
+        if members.member4 is not None:
+            group_members.append(members.member4)
+        if members.member5 is not None:
+            group_members.append(members.member5)
+        if members.member6 is not None:
+            group_members.append(members.member6)
+
+        # 休日判定のリストを作成
+        # 誰でもいいのでUserListの一番最初の人のデータから休日判定をする
+        user = db.session.query(UserList).first()
+        holidays = []
+        if len(user.thu) == 8:
+            holidays.append(0)
+        else:
+            holidays.append(1)
+        if len(user.fri) == 8:
+            holidays.append(0)
+        else:
+            holidays.append(1)
+        if len(user.sat) == 8:
+            holidays.append(0)
+        else:
+            holidays.append(1)
+        if len(user.sun) == 8:
+            holidays.append(0)
+        else:
+            holidays.append(1)
+        if len(user.mon) == 8:
+            holidays.append(0)
+        else:
+            holidays.append(1)
+        if len(user.tue) == 8:
+            holidays.append(0)
+        else:
+            holidays.append(1)
+        if len(user.wed) == 8:
+            holidays.append(0)
+        else:
+            holidays.append(1)
+
+        schedule_list = []
+        maru_list = []
+        batsu_list = []
+        for i in holidays:
+            #配列のアドレスの関係上、maruとbatsuで分ける
+            if i == 0:
+                temp_maru = [0, 0, 0, 0, 0, 0, 0, 0]
+                temp_batsu = [0, 0, 0, 0, 0, 0, 0, 0]
+            else:
+                temp_maru = [0, 0, 0, 0, 0]
+                temp_batsu = [0, 0, 0, 0, 0]
+            maru_list.append(temp_maru)
+            batsu_list.append(temp_batsu)
+
+        for member in group_members:
+            user = db.session.query(UserList).filter_by(
+                user_name=member).first()
+
+            # 文字列が１文字ずつ分割されて配列になる
+            thu = list(user.thu)
+            fri = list(user.fri)
+            sat = list(user.sat)
+            sun = list(user.sun)
+            mon = list(user.mon)
+            tue = list(user.tue)
+            wed = list(user.wed)
+            week_data = [thu, fri, sat, sun, mon, tue, wed]
+
+            app.logger.info(week_data)
+
+            for i in range(7):
+                for j in range(len(maru_list[i])):
+                    temp_data = int(week_data[i][j])
+                    if temp_data == 3:
+                        maru_list[i][j] += 1
+                    elif temp_data <= 1:  # 未回答もバツに含める
+                        batsu_list[i][j] += 1
+
+        scheduled_time = []
+        day_data = ["木", "金", "土", "日", "月", "火", "水"]
+
+        app.logger.info(group_members)
+        app.logger.info(maru_list)
+
+        for i in range(7):
+            j = 0
+            if holidays[i] == 0:
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 9:00-10:30", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 10:30-12:00", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 12:00-14:00", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 14:00-16:00", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 16:00-17:30", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 17:30-19:00", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 19:00-20:30", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 20:30-22:00", "flag": flag})
+
+            else: # 休日なら
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 9:00-11:00", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 11:00-13:00", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 13:00-15:00", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 15:00-17:00", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 17:00-19:00", "flag": flag})
+
+        # メンバーのupdateフラグを配列に格納
+        update_flags = []
+        for member in group_members:
+            user = db.session.query(UserList).filter_by(
+                user_name=member).first()
+            update_flags.append(user.update)
+
+        return render_template("group.html", group_name=group_name, members=group_members, scheduled_time=scheduled_time, update=update_flags)
+
+
+@app.route('/add_to_group/<string:group_name>', methods=['GET', 'POST'])
+def add_to_group(group_name):
+    if request.method == 'GET':
+        return render_template("add_to_group.html")
+
+    # POSTなら
+    add_user = request.form['add_user']
+
+    if db.session.query(UserList).filter_by(user_name=add_user).first() is None:
+        flash('ユーザーが存在しません', category='alert alert-danger')
+        return redirect(url_for('add_to_group', group_name=group_name))
+
+    group = db.session.query(GroupList).filter_by(
+        group_name=group_name).first()
+    if (group.member1 or group.member1 or group.member1 or group.member1 or group.member1) == add_user:
+        flash('{} は既にグループに加入しています'.format(add_user),
+              category='alert alert-danger')
+        return redirect(url_for('add_to_group', group_name=group_name))
+
+    if group.member2 is None:
+        group.member2 = add_user
+    elif group.member3 is None:
+        group.member3 = add_user
+    elif group.member4 is None:
+        group.member4 = add_user
+    elif group.member5 is None:
+        group.member5 = add_user
+    elif group.member6 is None:
+        group.member6 = add_user
+    else:
+        flash('これ以上メンバーを追加できません', category='alert alert-danger')
+        return redirect(url_for('add_to_group', group_name=group_name))
+
+    db.session.commit()
+    flash('{} をグループに追加しました'.format(add_user), category='alert alert-success')
+
+    return redirect(url_for('group', group_name=group_name))
+
+
+@app.route('/remove_from_group/<string:group_name>', methods=['GET', 'POST'])
+def remove_from_group(group_name):
+    if request.method == 'GET':
+        members = db.session.query(GroupList).filter_by(
+            group_name=group_name).first()
+        app.logger.info(members)
+
+        # かなり冗長だがこれしか思いつかなかった
+        group_members = []
+        if members.member1 is not None:
+            group_members.append(members.member1)
+        if members.member2 is not None:
+            group_members.append(members.member2)
+        if members.member3 is not None:
+            group_members.append(members.member3)
+        if members.member4 is not None:
+            group_members.append(members.member4)
+        if members.member5 is not None:
+            group_members.append(members.member5)
+        if members.member6 is not None:
+            group_members.append(members.member6)
+
+        return render_template("remove_from_group.html", group_name=group_name, members=group_members)
+
+    # POSTなら
+    remove_user = request.form['remove_user']
+    members = db.session.query(GroupList).filter_by(
+        group_name=group_name).first()
+
+    if members.member1 == remove_user:
+        members.member1 = None
+    elif members.member2 == remove_user:
+        members.member2 = None
+    elif members.member3 == remove_user:
+        members.member3 = None
+    elif members.member4 == remove_user:
+        members.member4 = None
+    elif members.member5 == remove_user:
+        members.member5 = None
+    elif members.member6 == remove_user:
+        members.member6 = None
+    db.session.commit()
+
+    flash('{} をグループから削除しました'.format(remove_user),
+          category='alert alert-success')
+    return redirect(url_for('group', group_name=group_name))
 
 
 if __name__ == "__main__":

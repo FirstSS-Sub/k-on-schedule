@@ -16,10 +16,11 @@
 
 <hr>
 
-<div class="container">
-  <form method="POST">
-    <div class="col-sm-8 col-sm-offset-2">
-      <div class="caption text-center">
+<div class="caption text-center">
+  <div class="container">
+    <form method="POST">
+      <div class="col-sm-8 col-sm-offset-2">
+
         <div class="form-group">
           <label for="user_name"><span class="label label-danger">必須</span> ユーザー名</label>
           <input type="text" id="user_name" name="user_name" class="form-control" placeholder="UserName" autofocus required>
@@ -30,7 +31,11 @@
         </div>
       </div>
       <button type="submit" class="btn btn-primary">登録</button>
-    </div>
+  </div>
   </form>
 </div>
+<footer>
+  <br>
+  <a href="/" class="btn btn-outline-primary btn-lg">トップページへ戻る</a>
+</footer>
 {% endblock %}

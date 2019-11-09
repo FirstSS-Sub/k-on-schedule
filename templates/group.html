@@ -59,6 +59,18 @@
     .home table tr:last-child td:last-child {
       border-radius: 0 0 5px 0;
     }
+    
+    .update {
+      background-color: skyblue;
+    }
+    
+    .green {
+      background-color: greenyellow;
+    }
+    
+    .yellow {
+      background-color: yellow;
+    }
   </style>
 </head>
 
@@ -86,14 +98,44 @@
       <tr>
         <th>メンバー</th>
       </tr>
-      {% for member_name in members %}
+      {% for member_name in members %} {% if update[loop.index0] == 1 %}
+      <tr>
+        <td class="update">{{member_name}}</td>
+      </tr>
+      {% else %}
       <tr>
         <td>{{member_name}}</td>
       </tr>
-      {% endfor %}
+      {% endif %} {% endfor %}
     </table>
   </div>
 
+  <br>
+
+  <div class="home">
+    <table>
+      <tr>
+        <th>予定の合う時間</th>
+      </tr>
+      {% for time in scheduled_time %} {% if time.flag == 1 %}
+      <tr>
+        <td class="green">{{time.time}}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td class="yellow">{{time.time}}</td>
+      </tr>
+      {% endif %} {% endfor %}
+    </table>
+  </div>
+  <div class="caption text-right">
+    <a href="/add_to_group/{{group_name}}" class="btn btn-outline-primary btn-lg">メンバーを追加する</a>
+    <a href="/remove_from_group/{{group_name}}" class="btn btn-outline-danger btn-lg">メンバーを削除する</a>
+  </div>
+  <footer>
+    <br>
+    <a href="/" class="btn btn-outline-primary btn-lg">トップページへ戻る</a>
+  </footer>
 </body>
 
 </html>

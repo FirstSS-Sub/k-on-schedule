@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="../static/css/style.css">
+  <title>軽音スケジュール</title>
+  <!-- Javascript -->
+  <script type="text/javascript">
+    <!-- 
+
+    function check() {
+
+      if (window.confirm(document.getElementById('add_user').value + ' を追加してよろしいですか？')) { // 確認ダイアログを表示
+
+        return true; // 「OK」時は送信を実行
+
+      } else { // 「キャンセル」時の処理
+
+        return false; // 送信を中止
+
+      }
+
+    }
+
+    // -->
+  </script>
+</head>
+
+<body data-spy="scroll" data-target="#navbarResponsive">
+  <div class="login">
+    <div class="login-triangle"></div>
+    <div class="container">
+      <header>
+        <div class="row">
+          <h1>Add to group</h1>
+        </div>
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %}
+        <ul class=flashes>
+          {% for category, message in messages %}
+          <div class="{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </ul>
+        {% endif %} {% endwith %}
+      </header>
+    </div>
+
+    <form class="login-container" method="POST" onSubmit="return check();">
+      <p><input type="text" id="add_user" name="add_user" placeholder="追加したいユーザー名を入力してください" autofocus required></p>
+      <button type="submit" class="btn btn-primary">追加する</button>
+    </form>
+  </div>
+  <footer>
+    <br>
+    <a href="/" class="btn btn-outline-primary btn-lg">トップページへ戻る</a>
+  </footer>
+</body>
+
+</html>

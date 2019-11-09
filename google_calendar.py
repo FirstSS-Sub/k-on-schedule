@@ -121,13 +121,17 @@ def holiday():
         holidays = [x['start']['date'] for x in events]
         print(holidays)
         for i in range(7):
-            print(str(start_day + timedelta(days=i)))
+
             if str(start_day + timedelta(days=i)) in holidays or (i == 2 or i == 3):
                 week_holidays.append(1)
             else:
                 week_holidays.append(0)
     else:
         week_holidays = [0, 0, 1, 1, 0, 0, 0]
+
+    for i in range(7):
+        print(str(start_day + timedelta(days=i)))
+
     return week_holidays
 
 
