@@ -262,7 +262,7 @@ def login():
         'home.html', user_name=user_name, part_group=participating_group))
 
     # Cookieの設定を行う
-    max_age = 60 * 60  # 1時間
+    max_age = 60 * 60 * 24 # 1日
     expires = int(datetime.now().timestamp()) + max_age
     response.set_cookie('user_name', value=user.user_name, max_age=max_age)
     #                   ,expires=expires, path='/', domain=domain, secure=None, httponly=False)
