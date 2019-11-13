@@ -20,10 +20,11 @@ from google_calendar import holiday
 app = Flask(__name__)
 app.secret_key = "k-on2019"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///k-on.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or 'sqlite:///k-on.db' # or "postgresql://localhost/k-on"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 db = SQLAlchemy(app)
+# db.create_all()
 
 """
 CRUD操作
