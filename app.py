@@ -289,11 +289,11 @@ def schedule():
     """
     if request.method == 'GET' and user_name is not None:
         week_data = []
-        day_data = ["木", "金", "土", "日", "月", "火", "水"]
-        week_holidays = holiday()
+        # day_data = ["木", "金", "土", "日", "月", "火", "水"]
+        week_holidays, week_date = holiday()
         for i in range(7):
             data = {
-                "day": day_data[i],
+                "day": week_date[i],
                 "holiday": week_holidays[i],
                 "num": i+1
             }
@@ -329,7 +329,7 @@ def schedule():
     week_schedule = []
     for i in range(7):
         day = ""
-        week_holidays = holiday()
+        week_holidays, week_date = holiday()
         # 平日なら
         if week_holidays[i] == 0:
             for j in range(8):

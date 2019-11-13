@@ -129,12 +129,18 @@ def holiday():
     else:
         week_holidays = [0, 0, 1, 1, 0, 0, 0]
 
+    week_date = []
+    day_data = ["木", "金", "土", "日", "月", "火", "水"]
     for i in range(7):
-        print(str(start_day + timedelta(days=i)))
+        temp_day = str(start_day + timedelta(days=i))
+        ymd = temp_day.split("-")
+        week_date.append("{}/{} ({})".format(ymd[1], ymd[2], day_data[i]))
+        print(week_date[i])
 
-    return week_holidays
+    print(week_holidays)
+
+    return week_holidays, week_date
 
 
 if __name__ == "__main__":
-    a = holiday()
-    print(a)
+    holiday()

@@ -126,6 +126,14 @@ for user in users:
         user.wed = "00000"
 
     user.update = 0
-
     db.session.add(user)
+
+# グループメンバーが誰もいないグループを削除する
+groups = GroupList.query.all()
+
+for group in groups:
+    if group.member1 == None and group.member2 == None and group.member3 == None and group.member4 == None and group.member5 == None and group.member6 == None:
+        db.session.delete(group)
+
+
 db.session.commit()
