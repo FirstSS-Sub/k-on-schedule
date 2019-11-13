@@ -1,5 +1,4 @@
 from datetime import date
-from httplib2 import Http
 from oauth2client.service_account import ServiceAccountCredentials
 from apiclient import *
 from datetime import *
