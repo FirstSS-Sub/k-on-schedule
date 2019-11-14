@@ -430,6 +430,10 @@ def group(group_name):
         else:
             holidays.append(1)
 
+        ###########################################################################
+        """
+        # 大丈夫なほう
+
         schedule_list = []
         maru_list = []
         batsu_list = []
@@ -601,9 +605,12 @@ def group(group_name):
             update_flags.append(user.update)
 
         return render_template("group.html", group_name=group_name, members=group_members, scheduled_time=scheduled_time, update=update_flags)
+        """
+        ###########################################################################
+
 
         # application error H18 が起きて実行できないver #
-        """
+        
         schedule_list = []
         maru_list = []
         batsu_list = []
@@ -836,7 +843,7 @@ def group(group_name):
                                              scheduled_time=scheduled_time,
                                              all_week_data=all_week_data,
                                              update=update_flags)
-        """
+        
         ##############################################
         """
 
@@ -859,6 +866,25 @@ def group(group_name):
       {% endfor %}
     </table>
     -->
+        """
+        #----------------------------------------------------#
+        """
+        大丈夫なほう
+
+        <table>
+      <tr>
+        <th>予定の合う時間</th>
+      </tr>
+      {% for time in scheduled_time %} {% if time.flag == 1 %}
+      <tr>
+        <td class="green">{{time.time}}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td class="yellow">{{time.time}}</td>
+      </tr>
+      {% endif %} {% endfor %}
+    </table>
         """
         ##############################################
 

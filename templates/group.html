@@ -124,18 +124,21 @@
   <div class="home">
     <table>
       <tr>
-        <th>予定の合う時間</th>
+        <th>時間</th>
+        {% for member_name in members %}
+        <th>{{member_name}}</th>
+        {% endfor %}
       </tr>
-      {% for time in scheduled_time %} {% if time.flag == 1 %}
+      {% for time in scheduled_time %}
       <tr>
-        <td class="green">{{time.time}}</td>
+        <td class="flag-{{time.flag}}">{{time.time}}</td>
+        {% for row_week_data in all_week_data[loop.index0] %}
+        <td>{{row_week_data}}</td>
+        {% endfor %}
       </tr>
-      {% else %}
-      <tr>
-        <td class="yellow">{{time.time}}</td>
-      </tr>
-      {% endif %} {% endfor %}
+      {% endfor %}
     </table>
+    -->
   </div>
   <div class="caption text-right">
     <a href="/add_to_group/{{group_name}}" class="btn btn-outline-primary btn-lg">メンバーを追加する</a>
