@@ -121,7 +121,6 @@
         {% endfor %}
       </tr>
       {% for time in scheduled_time %}
-      <!--{% if time.flag == 3 %}-->
       <tr>
         <td class="flag-{{time.flag}}">{{time.time}}</td>
         {% for row_week_data in all_week_data[loop.index0] %}
