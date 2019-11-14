@@ -927,4 +927,4 @@ def remove_from_group(group_name):
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
