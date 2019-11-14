@@ -64,11 +64,11 @@
       background-color: skyblue;
     }
     
-    .green {
+    .flag-3 {
       background-color: greenyellow;
     }
     
-    .yellow {
+    .flag-2 {
       background-color: yellow;
     }
   </style>
@@ -120,28 +120,15 @@
         <th>{{member_name}}</th>
         {% endfor %}
       </tr>
-      {% for time in scheduled_time %}{% if time.flag == 3 %}
+      {% for time in scheduled_time %}
+      <!--{% if time.flag == 3 %}-->
       <tr>
-        <td class="green">{{time.time}}</td>
+        <td class="flag-{{time.flag}}">{{time.time}}</td>
         {% for row_week_data in all_week_data[loop.index0] %}
         <td>{{row_week_data}}</td>
         {% endfor %}
       </tr>
-      {% elif time.flag == 2 %}
-      <tr>
-        <td class="yellow">{{time.time}}</td>
-        {% for row_week_data in all_week_data[loop.index0] %}
-        <td>{{row_week_data}}</td>
-        {% endfor %}
-      </tr>
-      {% else %}
-      <tr>
-        <td>{{time.time}}</td>
-        {% for row_week_data in all_week_data[loop.index0] %}
-        <td>{{row_week_data}}</td>
-        {% endfor %}
-      </tr>
-      {% endif %} {% endfor %}
+      {% endfor %}
     </table>
   </div>
   <div class="caption text-right">
