@@ -263,7 +263,6 @@ def login():
 
     # Cookieの設定を行う
     max_age = 60 * 60 * 24 # 1日
-
     expires = int(datetime.now().timestamp()) + max_age
     response.set_cookie('user_name', value=user.user_name, max_age=max_age)
     #                   ,expires=expires, path='/', domain=domain, secure=None, httponly=False)
@@ -431,6 +430,180 @@ def group(group_name):
         else:
             holidays.append(1)
 
+        schedule_list = []
+        maru_list = []
+        batsu_list = []
+        for i in holidays:
+            #配列のアドレスの関係上、maruとbatsuで分ける
+            if i == 0:
+                temp_maru = [0, 0, 0, 0, 0, 0, 0, 0]
+                temp_batsu = [0, 0, 0, 0, 0, 0, 0, 0]
+            else:
+                temp_maru = [0, 0, 0, 0, 0]
+                temp_batsu = [0, 0, 0, 0, 0]
+            maru_list.append(temp_maru)
+            batsu_list.append(temp_batsu)
+
+        for member in group_members:
+            user = db.session.query(UserList).filter_by(
+                user_name=member).first()
+
+            # 文字列が１文字ずつ分割されて配列になる
+            thu = list(user.thu)
+            fri = list(user.fri)
+            sat = list(user.sat)
+            sun = list(user.sun)
+            mon = list(user.mon)
+            tue = list(user.tue)
+            wed = list(user.wed)
+            week_data = [thu, fri, sat, sun, mon, tue, wed]
+
+            app.logger.info(week_data)
+
+            for i in range(7):
+                for j in range(len(maru_list[i])):
+                    temp_data = int(week_data[i][j])
+                    if temp_data == 3:
+                        maru_list[i][j] += 1
+                    elif temp_data <= 1:  # 未回答もバツに含める
+                        batsu_list[i][j] += 1
+
+        scheduled_time = []
+        day_data = ["木", "金", "土", "日", "月", "火", "水"]
+
+        app.logger.info(group_members)
+        app.logger.info(maru_list)
+
+        for i in range(7):
+            j = 0
+            if holidays[i] == 0:
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 9:00-10:30", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 10:30-12:00", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 12:00-14:00", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 14:00-16:00", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 16:00-17:30", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 17:30-19:00", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 19:00-20:30", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 20:30-22:00", "flag": flag})
+
+            else: # 休日なら
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 9:00-11:00", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 11:00-13:00", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 13:00-15:00", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 15:00-17:00", "flag": flag})
+                j += 1
+
+                if batsu_list[i][j] == 0:
+                    if maru_list[i][j] == len(group_members):  # 全員丸なら
+                        flag = 1
+                    else:  # 三角が1人以上いるなら
+                        flag = 0
+                    scheduled_time.append(
+                        {"time": day_data[i] + " 17:00-19:00", "flag": flag})
+
+        # メンバーのupdateフラグを配列に格納
+        update_flags = []
+        for member in group_members:
+            user = db.session.query(UserList).filter_by(
+                user_name=member).first()
+            update_flags.append(user.update)
+
+        return render_template("group.html", group_name=group_name, members=group_members, scheduled_time=scheduled_time, update=update_flags)
+
+        # application error H18 が起きて実行できないver #
+        """
         schedule_list = []
         maru_list = []
         batsu_list = []
@@ -663,7 +836,8 @@ def group(group_name):
                                              scheduled_time=scheduled_time,
                                              all_week_data=all_week_data,
                                              update=update_flags)
-
+        """
+        ##############################################
 
 @app.route('/add_to_group/<string:group_name>', methods=['GET', 'POST'])
 def add_to_group(group_name):

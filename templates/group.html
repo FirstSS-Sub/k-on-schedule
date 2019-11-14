@@ -64,11 +64,11 @@
       background-color: skyblue;
     }
     
-    .flag-3 {
+    .green {
       background-color: greenyellow;
     }
     
-    .flag-2 {
+    .yellow {
       background-color: yellow;
     }
   </style>
@@ -115,6 +115,21 @@
   <div class="home">
     <table>
       <tr>
+        <th>予定の合う時間</th>
+      </tr>
+      {% for time in scheduled_time %} {% if time.flag == 1 %}
+      <tr>
+        <td class="green">{{time.time}}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td class="yellow">{{time.time}}</td>
+      </tr>
+      {% endif %} {% endfor %}
+    </table>
+    <!--
+      <table>
+      <tr>
         <th>時間</th>
         {% for member_name in members %}
         <th>{{member_name}}</th>
@@ -129,6 +144,7 @@
       </tr>
       {% endfor %}
     </table>
+    -->
   </div>
   <div class="caption text-right">
     <a href="/add_to_group/{{group_name}}" class="btn btn-outline-primary btn-lg">メンバーを追加する</a>
