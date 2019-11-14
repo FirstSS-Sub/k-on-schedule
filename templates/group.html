@@ -122,11 +122,11 @@
   <br>
 
   <div class="home">
-    <table style="table-layout:fixed;">
+    <table>
       <tr>
         <th>時間</th>
         {% for member_name in members %}
-        <th>{{member_name}}</th>
+        <th nowrap>{{member_name}}</th>
         {% endfor %}
       </tr>
       {% for time in scheduled_time %}
