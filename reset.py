@@ -86,7 +86,7 @@ class GroupList(db.Model):
             self.id, self.group_name, self.member1, self.member2, self.member3, self.member4, self.member5, self.member6)
 
 
-week_holidays = holiday()
+week_holidays, week_date = holiday()
 users = UserList.query.all()
 
 for user in users:

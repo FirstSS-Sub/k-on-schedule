@@ -115,15 +115,31 @@
   <div class="home">
     <table>
       <tr>
-        <th>予定の合う時間</th>
+        <th>時間</th>
+        {% for member_name in members %}
+        <th>{{member_name}}</th>
+        {% endfor %}
       </tr>
-      {% for time in scheduled_time %} {% if time.flag == 1 %}
+      {% for time in scheduled_time %}{% if time.flag == 3 %}
       <tr>
         <td class="green">{{time.time}}</td>
+        {% for row_week_data in all_week_data[loop.index0] %}
+        <td>{{row_week_data}}</td>
+        {% endfor %}
+      </tr>
+      {% elif time.flag == 2 %}
+      <tr>
+        <td class="yellow">{{time.time}}</td>
+        {% for row_week_data in all_week_data[loop.index0] %}
+        <td>{{row_week_data}}</td>
+        {% endfor %}
       </tr>
       {% else %}
       <tr>
-        <td class="yellow">{{time.time}}</td>
+        <td>{{time.time}}</td>
+        {% for row_week_data in all_week_data[loop.index0] %}
+        <td>{{row_week_data}}</td>
+        {% endfor %}
       </tr>
       {% endif %} {% endfor %}
     </table>
