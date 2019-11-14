@@ -463,7 +463,7 @@ def group(group_name):
             wed = list(user.wed)
             week_data = [thu, fri, sat, sun, mon, tue, wed]
 
-            app.logger.info(week_data)
+            # app.logger.info(week_data)
 
             for i in range(7):
                 for j in range(len(maru_list[i])):
@@ -483,14 +483,14 @@ def group(group_name):
             all_members_data.append(member_data)
 
         all_week_data = np.array(all_members_data).T # コマ時間のデータが行、メンバーごとのデータが列になるように、転置行列にする
-        app.logger.info(all_week_data)
+        # app.logger.info(all_week_data)
 
 
         scheduled_time = []
         day_data = ["木", "金", "土", "日", "月", "火", "水"]
 
-        app.logger.info(group_members)
-        app.logger.info(maru_list)
+        # app.logger.info(group_members)
+         #app.logger.info(maru_list)
 
         for i in range(7):
             j = 0
@@ -650,31 +650,6 @@ def group(group_name):
                 scheduled_time.append(
                     {"time": day_data[i] + " 17:00-19:00", "flag": flag})
 
-        #######################################################
-        """
-        for member in group_members:
-            user = db.session.query(UserList).filter_by(
-                user_name=member).first()
-
-            # 文字列が１文字ずつ分割されて配列になる
-            thu = list(user.thu)
-            fri = list(user.fri)
-            sat = list(user.sat)
-            sun = list(user.sun)
-            mon = list(user.mon)
-            tue = list(user.tue)
-            wed = list(user.wed)
-            week_data = [thu, fri, sat, sun, mon, tue, wed]
-
-            app.logger.info(week_data)
-
-            for i in range(7):
-                for j in range(len(week_data[i])):
-                    temp_data = int(week_data[i][j])
-                    if temp_data == 3:
-
-        """
-        ########################################################
 
         # メンバーのupdateフラグを配列に格納
         update_flags = []
