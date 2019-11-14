@@ -838,6 +838,29 @@ def group(group_name):
                                              update=update_flags)
         """
         ##############################################
+        """
+
+    ----- httpの部分 -----
+    <!--
+      <table>
+      <tr>
+        <th>時間</th>
+        {% for member_name in members %}
+        <th>{{member_name}}</th>
+        {% endfor %}
+      </tr>
+      {% for time in scheduled_time %}
+      <tr>
+        <td class="flag-{{time.flag}}">{{time.time}}</td>
+        {% for row_week_data in all_week_data[loop.index0] %}
+        <td>{{row_week_data}}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </table>
+    -->
+        """
+        ##############################################
 
 @app.route('/add_to_group/<string:group_name>', methods=['GET', 'POST'])
 def add_to_group(group_name):
