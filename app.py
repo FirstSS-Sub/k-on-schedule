@@ -991,6 +991,28 @@ def change_name():
     db.session.add(user)
     db.session.commit()
 
+    groups = db.session.query(GroupList).filter(or_(GroupList.member1 == user_name,
+                                                    GroupList.member2 == user_name,
+                                                    GroupList.member3 == user_name,
+                                                    GroupList.member4 == user_name,
+                                                    GroupList.member5 == user_name,
+                                                    GroupList.member6 == user_name)).all()
+
+    for g in groups:
+        if g.member1 == user_name:
+            g.member1 = changed_name
+        elif g.member2 == user_name:
+            g.member2 = changed_name
+        elif g.member3 == user_name:
+            g.member3 = changed_name
+        elif g.member4 == user_name:
+            g.member4 = changed_name
+        elif g.member5 == user_name:
+            g.member5 = changed_name
+        else:
+            g.member6 = changed_name
+        
+
     # make_responseでレスポンスオブジェクトを生成する
     response = make_response(render_template(
         'home.html', user_name=changed_name))
