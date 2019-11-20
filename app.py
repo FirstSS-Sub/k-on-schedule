@@ -1001,19 +1001,28 @@ def change_name():
     for g in groups:
         if g.member1 == user_name:
             g.member1 = changed_name
+            db.session.add(g)
+            db.session.commit()
         elif g.member2 == user_name:
             g.member2 = changed_name
+            db.session.add(g)
+            db.session.commit()
         elif g.member3 == user_name:
             g.member3 = changed_name
+            db.session.add(g)
+            db.session.commit()
         elif g.member4 == user_name:
             g.member4 = changed_name
+            db.session.add(g)
+            db.session.commit()
         elif g.member5 == user_name:
             g.member5 = changed_name
+            db.session.add(g)
+            db.session.commit()
         else:
             g.member6 = changed_name
-
-    db.session.add(groups)
-    db.session.commit()
+            db.session.add(g)
+            db.session.commit()
         
 
     # make_responseでレスポンスオブジェクトを生成する
