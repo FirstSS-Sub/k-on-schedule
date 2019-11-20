@@ -1011,6 +1011,9 @@ def change_name():
             g.member5 = changed_name
         else:
             g.member6 = changed_name
+
+    db.session.add(groups)
+    db.session.commit()
         
 
     # make_responseでレスポンスオブジェクトを生成する
