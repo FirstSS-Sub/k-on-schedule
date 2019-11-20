@@ -147,7 +147,8 @@ def create_user():
         'home.html', user_name=user_name))
 
     # Cookieの設定を行う
-    max_age = 60 * 60  # 1時間
+    # max_age = 60 * 60 * 24 # 1日
+    max_age = 30 # テスト用
     expires = int(datetime.now().timestamp()) + max_age
     response.set_cookie('user_name', value=user.user_name, max_age=max_age)
     #                   ,expires=expires, path='/', domain=domain, secure=None, httponly=False)
@@ -262,7 +263,8 @@ def login():
         'home.html', user_name=user_name, part_group=participating_group))
 
     # Cookieの設定を行う
-    max_age = 60 * 60 * 24 # 1日
+    #max_age = 60 * 60 * 24 # 1日
+    max_age = 30  # テスト用
     expires = int(datetime.now().timestamp()) + max_age
     response.set_cookie('user_name', value=user.user_name, max_age=max_age)
     #                   ,expires=expires, path='/', domain=domain, secure=None, httponly=False)
@@ -974,6 +976,26 @@ def remove_from_group(group_name):
           category='alert alert-success')
     return redirect(url_for('group', group_name=group_name))
 
+
+@app.route('/change_name', methods=['GET', 'POST'])
+def change_name():
+    if request.method == 'GET':
+        return render_template("change_name.html")
+
+    # POSTなら
+    user_name = request.cookies.get('user_name', None)
+    if user_name is None:
+        flash('ログインしてください', category='alert alert-danger')
+        return redirect(url_for('index'))
+
+    changed_name = request.form['changed_name']
+    user = db.session.query(UserList).filter_by(user_name=user_name).first()
+    user.user_name = changed_name
+    db.session.add(user)
+    db.session.commit()
+
+    flash('ユーザー名を変更しました', category='alert alert-success')
+    return render_template('home.html', user_name=changed_name)
 
 if __name__ == "__main__":
     app.run(debug=True)
