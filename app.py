@@ -63,7 +63,6 @@ class UserList(db.Model):
     tue = db.Column(db.String(8), nullable=False, default="00000000")
     wed = db.Column(db.String(8), nullable=False, default="00000000")
     update = db.Column(db.Integer(), nullable=False, default=0)
-    comment = db.Column(db.String(100), nullable=False, default="")
 
 
     def __repr__(self):
