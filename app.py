@@ -63,6 +63,7 @@ class UserList(db.Model):
     tue = db.Column(db.String(8), nullable=False, default="00000000")
     wed = db.Column(db.String(8), nullable=False, default="00000000")
     update = db.Column(db.Integer(), nullable=False, default=0)
+    comment = db.Column(db.String(100), nullable=False, default="")
 
 
     def __repr__(self):
@@ -85,9 +86,6 @@ class GroupList(db.Model):
     def __repr__(self):
         return "GroupList<{}, {}, {}, {}, {}, {}, {}, {}>".format(
             self.id, self.group_name, self.member1, self.member2, self.member3, self.member4, self.member5, self.member6)
-
-
-db.create_all()
 
 
 @app.route('/')
@@ -147,8 +145,8 @@ def create_user():
         'home.html', user_name=user_name))
 
     # Cookieの設定を行う
-    # max_age = 60 * 60 * 24 # 1日
-    max_age = 30 # テスト用
+    max_age = 60 * 60 * 24 # 1日
+    #max_age = 30 # テスト用
     expires = int(datetime.now().timestamp()) + max_age
     response.set_cookie('user_name', value=user.user_name, max_age=max_age)
     #                   ,expires=expires, path='/', domain=domain, secure=None, httponly=False)
@@ -263,8 +261,8 @@ def login():
         'home.html', user_name=user_name, part_group=participating_group))
 
     # Cookieの設定を行う
-    #max_age = 60 * 60 * 24 # 1日
-    max_age = 30  # テスト用
+    max_age = 60 * 60 * 24 # 1日
+    #max_age = 30  # テスト用
     expires = int(datetime.now().timestamp()) + max_age
     response.set_cookie('user_name', value=user.user_name, max_age=max_age)
     #                   ,expires=expires, path='/', domain=domain, secure=None, httponly=False)
@@ -994,8 +992,19 @@ def change_name():
     db.session.add(user)
     db.session.commit()
 
+    # make_responseでレスポンスオブジェクトを生成する
+    response = make_response(render_template(
+        'home.html', user_name=changed_name))
+
+    # Cookieの設定を行う
+    max_age = 60 * 60 * 24 # 1日
+    #max_age = 30  # テスト用
+    expires = int(datetime.now().timestamp()) + max_age
+    response.set_cookie('user_name', value=user.user_name, max_age=max_age)
+    #                   ,expires=expires, path='/', domain=domain, secure=None, httponly=False)
+
     flash('ユーザー名を変更しました', category='alert alert-success')
-    return render_template('home.html', user_name=changed_name)
+    return response
 
 if __name__ == "__main__":
     app.run(debug=True)
