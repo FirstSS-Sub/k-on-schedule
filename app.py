@@ -1002,41 +1002,35 @@ def change_name():
         if g.member1 == user_name:
             g.member1 = changed_name
             db.session.add(g)
-            db.session.commit()
         elif g.member2 == user_name:
             g.member2 = changed_name
             db.session.add(g)
-            db.session.commit()
         elif g.member3 == user_name:
             g.member3 = changed_name
             db.session.add(g)
-            db.session.commit()
         elif g.member4 == user_name:
             g.member4 = changed_name
             db.session.add(g)
-            db.session.commit()
         elif g.member5 == user_name:
             g.member5 = changed_name
             db.session.add(g)
-            db.session.commit()
         else:
             g.member6 = changed_name
             db.session.add(g)
-            db.session.commit()
-        
+
+    db.session.commit()
 
     # make_responseでレスポンスオブジェクトを生成する
-    response = make_response(render_template(
-        'home.html', user_name=changed_name))
+    response = make_response(redirect(url_for("index")))
 
     # Cookieの設定を行う
     max_age = 60 * 60 * 24 # 1日
     #max_age = 30  # テスト用
     expires = int(datetime.now().timestamp()) + max_age
-    response.set_cookie('user_name', value=user.user_name, max_age=max_age)
+    response.set_cookie('user_name', value=changed_name, max_age=max_age)
     #                   ,expires=expires, path='/', domain=domain, secure=None, httponly=False)
 
-    flash('ユーザー名を変更しました', category='alert alert-success')
+    flash('ユーザー名を {} に変更しました'.format(changed_name), category='alert alert-success')
     return response
 
 if __name__ == "__main__":
