@@ -87,9 +87,10 @@ class GroupList(db.Model):
         return "GroupList<{}, {}, {}, {}, {}, {}, {}, {}>".format(
             self.id, self.group_name, self.member1, self.member2, self.member3, self.member4, self.member5, self.member6)
 
-
+"""
 sql = "ALTER TABLE UserList ADD comment varchar(100) NULL"
 db.session.execute(sql)
+"""
 
 
 @app.route('/')
