@@ -63,11 +63,12 @@ class UserList(db.Model):
     tue = db.Column(db.String(8), nullable=False, default="00000000")
     wed = db.Column(db.String(8), nullable=False, default="00000000")
     update = db.Column(db.Integer(), nullable=False, default=0)
+    comment = db.Column(db.String(100), nullable=False, default="")
 
 
     def __repr__(self):
         return "UserList<{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}>".format(
-            self.id, self.user_name, self.password, self.thu, self.fri, self.sat, self.sun, self.mon, self.tue, self.wed, self.update)
+            self.id, self.user_name, self.password, self.thu, self.fri, self.sat, self.sun, self.mon, self.tue, self.wed, self.update, self.comment)
 
 
 class GroupList(db.Model):
@@ -85,6 +86,10 @@ class GroupList(db.Model):
     def __repr__(self):
         return "GroupList<{}, {}, {}, {}, {}, {}, {}, {}>".format(
             self.id, self.group_name, self.member1, self.member2, self.member3, self.member4, self.member5, self.member6)
+
+
+sql = "ALTER TABLE UserList ADD comment varchar(100) NULL"
+db.session.execute(sql)
 
 
 @app.route('/')
@@ -986,6 +991,12 @@ def change_name():
         return redirect(url_for('index'))
 
     changed_name = request.form['changed_name']
+
+    if db.session.query(UserList).filter_by(user_name=changed_name).first():
+        error_message = 'ユーザー名 {} はすでに使用されています'.format(changed_name)
+        flash(error_message, category='alert alert-danger')
+        return redirect(url_for('change_name'))
+
     user = db.session.query(UserList).filter_by(user_name=user_name).first()
     user.user_name = changed_name
     db.session.add(user)
