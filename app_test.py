@@ -105,8 +105,6 @@ sql = 'ALTER TABLE UserList ADD comment varchar(255) DEFAULT ""'
 db.session.execute(sql)
 """
 
-db.create_all()
-
 
 @app.route('/')
 def index():
