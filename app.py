@@ -28,6 +28,11 @@ db = SQLAlchemy(app)
 # db.create_all()
 
 """
+dbへアクセス
+$ heroku pg: psql
+"""
+
+"""
 CRUD操作
 
 ----create----
