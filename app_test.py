@@ -63,12 +63,12 @@ class UserList(db.Model):
     tue = db.Column(db.String(8), nullable=False, default="00000000")
     wed = db.Column(db.String(8), nullable=False, default="00000000")
     update = db.Column(db.Integer(), nullable=False, default=0)
-    # comment = db.Column(db.String(100), nullable=False, default="")
+    comment = db.Column(db.String(255), nullable=False, default="")
 
 
     def __repr__(self):
-        return "UserList<{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}>".format(
-            self.id, self.user_name, self.password, self.thu, self.fri, self.sat, self.sun, self.mon, self.tue, self.wed, self.update)
+        return "UserList<{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}>".format(
+            self.id, self.user_name, self.password, self.thu, self.fri, self.sat, self.sun, self.mon, self.tue, self.wed, self.update, self.comment)
 
 
 class GroupList(db.Model):
@@ -88,10 +88,23 @@ class GroupList(db.Model):
             self.id, self.group_name, self.member1, self.member2, self.member3, self.member4, self.member5, self.member6)
 
 """
+class CommentList(db.Model):
+    # sqlalchemyでカラムを後から追加する方法がわからなかったので別のテーブルとして作成
+    __tablename__ = "CommentList"
+    id = db.Column(db.Integer(), primary_key=True)
+    user_name = db.Column(db.String(100), nullable=False)
+    comment = db.Column(db.String(255), nullable=False)
+
+    def __repr__(self):
+        return "CommentList<{}, {}, {}>".format(self.id, self.user_name, self.comment)
+"""
+
+"""
 sql = "ALTER TABLE UserList ADD comment varchar(100) NULL"
 db.session.execute(sql)
 """
 
+db.create_all()
 
 @app.route('/')
 def index():
@@ -325,7 +338,7 @@ def schedule():
         week_data[5]["schedule"] = tue
         week_data[6]["schedule"] = wed
 
-        return render_template("schedule.html", week=week_data)
+        return render_template("schedule.html", week=week_data, initial_comment=user.comment)
 
     elif request.method == 'GET' and user_name is None:
         flash('ログインしてください', category='alert alert-danger')
@@ -359,6 +372,14 @@ def schedule():
     # 更新フラグ（update）を1にする
     user.update = 1
 
+    db.session.add(user)
+    db.session.commit()
+
+    # コメント処理
+    comment = request.form['comment']
+
+    user = db.session.query(UserList).filter_by(user_name=user_name).first()
+    user.comment = comment
     db.session.add(user)
     db.session.commit()
 
@@ -843,11 +864,20 @@ def group(group_name):
                 user_name=member).first()
             update_flags.append(user.update)
 
+        
+        # コメント処理
+        comment_list = []
+        for member in group_members:
+            user = db.session.query(UserList).filter_by(user_name=member).first()
+            if user.comment != "":
+                comment_list.append("{}: {}".format(member, user.comment))
+
         return render_template("group.html", group_name=group_name,
                                              members=group_members,
                                              scheduled_time=scheduled_time,
                                              all_week_data=all_week_data,
-                                             update=update_flags)
+                                             update=update_flags,
+                                             comment_list=comment_list)
         
         ##############################################
         """
@@ -1046,4 +1076,4 @@ def change_name():
     return response
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
