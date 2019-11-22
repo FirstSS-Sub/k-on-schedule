@@ -100,10 +100,11 @@ class CommentList(db.Model):
         return "CommentList<{}, {}, {}>".format(self.id, self.user_name, self.comment)
 """
 
-"""
+
 sql = 'ALTER TABLE UserList ADD comment varchar(255) DEFAULT ""'
 db.session.execute(sql)
-"""
+
+db.create_all()
 
 
 @app.route('/')

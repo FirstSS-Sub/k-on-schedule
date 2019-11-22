@@ -20,7 +20,8 @@ from google_calendar import holiday
 app = Flask(__name__)
 app.secret_key = "k-on2019"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or 'sqlite:///k-on.db' # or "postgresql://localhost/k-on"
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+    'DATABASE_URL') or 'sqlite:///k-on.db'  # or "postgresql://localhost/k-on"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 db = SQLAlchemy(app)
@@ -63,12 +64,11 @@ class UserList(db.Model):
     tue = db.Column(db.String(8), nullable=False, default="00000000")
     wed = db.Column(db.String(8), nullable=False, default="00000000")
     update = db.Column(db.Integer(), nullable=False, default=0)
-    # comment = db.Column(db.String(100), nullable=False, default="")
-
+    comment = db.Column(db.String(255), nullable=False, default="")
 
     def __repr__(self):
-        return "UserList<{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}>".format(
-            self.id, self.user_name, self.password, self.thu, self.fri, self.sat, self.sun, self.mon, self.tue, self.wed, self.update)
+        return "UserList<{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}>".format(
+            self.id, self.user_name, self.password, self.thu, self.fri, self.sat, self.sun, self.mon, self.tue, self.wed, self.update, self.comment)
 
 
 class GroupList(db.Model):
@@ -87,11 +87,24 @@ class GroupList(db.Model):
         return "GroupList<{}, {}, {}, {}, {}, {}, {}, {}>".format(
             self.id, self.group_name, self.member1, self.member2, self.member3, self.member4, self.member5, self.member6)
 
+
 """
-sql = "ALTER TABLE UserList ADD comment varchar(100) NULL"
-db.session.execute(sql)
+class CommentList(db.Model):
+    # sqlalchemyでカラムを後から追加する方法がわからなかったので別のテーブルとして作成
+    __tablename__ = "CommentList"
+    id = db.Column(db.Integer(), primary_key=True)
+    user_name = db.Column(db.String(100), nullable=False)
+    comment = db.Column(db.String(255), nullable=False)
+
+    def __repr__(self):
+        return "CommentList<{}, {}, {}>".format(self.id, self.user_name, self.comment)
 """
 
+
+sql = 'ALTER TABLE UserList ADD comment varchar(255) DEFAULT ""'
+db.session.execute(sql)
+
+db.create_all()
 
 
 @app.route('/')
@@ -116,7 +129,6 @@ def create_user():
         return render_template('create_user.html',
                                title='ユーザーの追加')
 
-
     # 登録フォームから送られてきた値を取得
     user_name = request.form['user_name']
     password = request.form['password']
@@ -135,7 +147,6 @@ def create_user():
         flash(error_message, category='alert alert-danger')
         return redirect(url_for('create_user'))
 
-
     # ハッシュ化する
     user = UserList(user_name=user_name,
                     password=generate_password_hash(password))
@@ -151,8 +162,8 @@ def create_user():
         'home.html', user_name=user_name))
 
     # Cookieの設定を行う
-    max_age = 60 * 60 * 24 # 1日
-    #max_age = 30 # テスト用
+    max_age = 60 * 60 * 24  # 1日
+    # max_age = 30 # テスト用
     expires = int(datetime.now().timestamp()) + max_age
     response.set_cookie('user_name', value=user.user_name, max_age=max_age)
     #                   ,expires=expires, path='/', domain=domain, secure=None, httponly=False)
@@ -174,7 +185,6 @@ def create_group():
         flash('ログインしていないユーザーはグループを作成できません', category='alert alert-danger')
         # トップページに遷移
         return redirect(url_for('index'))
-
 
     # 登録フォームから送られてきた値を取得
     group_name = request.form['group_name']
@@ -267,8 +277,8 @@ def login():
         'home.html', user_name=user_name, part_group=participating_group))
 
     # Cookieの設定を行う
-    max_age = 60 * 60 * 24 # 1日
-    #max_age = 30  # テスト用
+    max_age = 60 * 60 * 24  # 1日
+    # max_age = 30  # テスト用
     expires = int(datetime.now().timestamp()) + max_age
     response.set_cookie('user_name', value=user.user_name, max_age=max_age)
     #                   ,expires=expires, path='/', domain=domain, secure=None, httponly=False)
@@ -326,7 +336,7 @@ def schedule():
         week_data[5]["schedule"] = tue
         week_data[6]["schedule"] = wed
 
-        return render_template("schedule.html", week=week_data)
+        return render_template("schedule.html", week=week_data, initial_comment=user.comment)
 
     elif request.method == 'GET' and user_name is None:
         flash('ログインしてください', category='alert alert-danger')
@@ -363,6 +373,14 @@ def schedule():
     db.session.add(user)
     db.session.commit()
 
+    # コメント処理
+    comment = request.form['comment']
+
+    user = db.session.query(UserList).filter_by(user_name=user_name).first()
+    user.comment = comment
+    db.session.add(user)
+    db.session.commit()
+
     return redirect(url_for('login'))
 
 
@@ -377,11 +395,11 @@ def group(group_name):
         return redirect(url_for('index'))
 
     if not ((user_name == members.member1) or
-         (user_name == members.member2) or
-         (user_name == members.member3) or
-         (user_name == members.member4) or
-         (user_name == members.member5) or
-         (user_name == members.member6)):
+            (user_name == members.member2) or
+            (user_name == members.member3) or
+            (user_name == members.member4) or
+            (user_name == members.member5) or
+            (user_name == members.member6)):
         flash('このグループには加入していません', category='alert alert-danger')
         return redirect(url_for('index'))
 
@@ -442,7 +460,7 @@ def group(group_name):
 
         schedule_list = []
         maru_list = []
-        batsu_list = []
+        batsu_list
         for i in holidays:
             #配列のアドレスの関係上、maruとbatsuで分ける
             if i == 0:
@@ -614,14 +632,13 @@ def group(group_name):
         """
         ###########################################################################
 
-
         # application error H18 が起きて実行できないver #
-        
+
         schedule_list = []
         maru_list = []
         batsu_list = []
         for i in holidays:
-            #配列のアドレスの関係上、maruとbatsuで分ける
+            # 配列のアドレスの関係上、maruとbatsuで分ける
             if i == 0:
                 temp_maru = [0, 0, 0, 0, 0, 0, 0, 0]
                 temp_batsu = [0, 0, 0, 0, 0, 0, 0, 0]
@@ -668,15 +685,15 @@ def group(group_name):
 
             all_members_data.append(member_data)
 
-        all_week_data = np.array(all_members_data).T # コマ時間のデータが行、メンバーごとのデータが列になるように、転置行列にする
+        # コマ時間のデータが行、メンバーごとのデータが列になるように、転置行列にする
+        all_week_data = np.array(all_members_data).T
         # app.logger.info(all_week_data)
-
 
         scheduled_time = []
         day_data = ["木", "金", "土", "日", "月", "火", "水"]
 
         # app.logger.info(group_members)
-         #app.logger.info(maru_list)
+        # app.logger.info(maru_list)
 
         for i in range(7):
             j = 0
@@ -686,7 +703,7 @@ def group(group_name):
                         flag = 3
                     else:  # 三角が1人以上いるなら
                         flag = 2
-                else: # バツまたは未回答がいるなら
+                else:  # バツまたは未回答がいるなら
                     flag = 1
 
                 scheduled_time.append(
@@ -776,7 +793,7 @@ def group(group_name):
                 scheduled_time.append(
                     {"time": day_data[i] + " 20:30-22:00", "flag": flag})
 
-            else: # 休日なら
+            else:  # 休日なら
                 if batsu_list[i][j] == 0:
                     if maru_list[i][j] == len(group_members):  # 全員丸なら
                         flag = 3
@@ -836,7 +853,6 @@ def group(group_name):
                 scheduled_time.append(
                     {"time": day_data[i] + " 17:00-19:00", "flag": flag})
 
-
         # メンバーのupdateフラグを配列に格納
         update_flags = []
         for member in group_members:
@@ -844,12 +860,21 @@ def group(group_name):
                 user_name=member).first()
             update_flags.append(user.update)
 
+        # コメント処理
+        comment_list = []
+        for member in group_members:
+            user = db.session.query(UserList).filter_by(
+                user_name=member).first()
+            if user.comment != "":
+                comment_list.append("{}: {}".format(member, user.comment))
+
         return render_template("group.html", group_name=group_name,
-                                             members=group_members,
-                                             scheduled_time=scheduled_time,
-                                             all_week_data=all_week_data,
-                                             update=update_flags)
-        
+                               members=group_members,
+                               scheduled_time=scheduled_time,
+                               all_week_data=all_week_data,
+                               update=update_flags,
+                               comment_list=comment_list)
+
         ##############################################
         """
 
@@ -893,6 +918,7 @@ def group(group_name):
     </table>
         """
         ##############################################
+
 
 @app.route('/add_to_group/<string:group_name>', methods=['GET', 'POST'])
 def add_to_group(group_name):
@@ -1037,14 +1063,16 @@ def change_name():
     response = make_response(redirect(url_for("index")))
 
     # Cookieの設定を行う
-    max_age = 60 * 60 * 24 # 1日
-    #max_age = 30  # テスト用
+    max_age = 60 * 60 * 24  # 1日
+    # max_age = 30  # テスト用
     expires = int(datetime.now().timestamp()) + max_age
     response.set_cookie('user_name', value=changed_name, max_age=max_age)
     #                   ,expires=expires, path='/', domain=domain, secure=None, httponly=False)
 
-    flash('ユーザー名を {} に変更しました'.format(changed_name), category='alert alert-success')
+    flash('ユーザー名を {} に変更しました'.format(changed_name),
+          category='alert alert-success')
     return response
 
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
