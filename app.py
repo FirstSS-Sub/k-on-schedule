@@ -996,7 +996,6 @@ def change_name():
         error_message = 'ユーザー名 {} はすでに使用されています'.format(changed_name)
         flash(error_message, category='alert alert-danger')
         return redirect(url_for('change_name'))
-        print("aaa")
 
     user = db.session.query(UserList).filter_by(user_name=user_name).first()
     user.user_name = changed_name
